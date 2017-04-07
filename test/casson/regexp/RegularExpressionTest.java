@@ -10,7 +10,7 @@ public class RegularExpressionTest {
 
     @Test
     public void testConstructor() {
-        RegularExpression re = new RegularExpression("a*b*c*d*");
+        RegularExpression re = new RegularExpression("0*a|bc|3*f");
         re.printSyntaxTree();
     }
 

@@ -38,11 +38,24 @@ public class RegularExpression {
         syntaxTree = generateSyntaxTree(expression);
     }
 
+    private int getPrecedence(char a) {
+        switch (a) {
+            case '*':
+                return 1;
+            case '+':
+                return 2;
+            case '|':
+                return 3;
+            default:
+                return 4;
+        }
+    }
+
     private SyntaxTree generateSyntaxTree(String expression) {
         if (expression == null || expression.isEmpty()) {
             throw new IllegalArgumentException("Regular expression cannot be empty.");
         }
-        
+
         SyntaxTree previousCharacterTree = null;
         for (char character : expression.toCharArray()) {
             SyntaxTree currentTree = new SyntaxTree(character);
@@ -54,32 +67,48 @@ public class RegularExpression {
                     previousCharacterTree.parentTree.replace(previousCharacterTree, currentTree);
                 }
                 currentTree.setLeftTree(previousCharacterTree);
+            } else if (character == '|') { // union
+                if (previousCharacterTree == null) {
+                    throw new IllegalArgumentException(expression + " is not a valid regular expression.");
+                }
+                while (previousCharacterTree.parentTree != null
+                        && getPrecedence(previousCharacterTree.content) > getPrecedence(previousCharacterTree.parentTree.content)) {
+                    previousCharacterTree = previousCharacterTree.parentTree;
+                }
+                if (previousCharacterTree.parentTree != null) {
+                    previousCharacterTree.parentTree.replace(previousCharacterTree, currentTree);
+                }
+                currentTree.setLeftTree(previousCharacterTree);
             } else { // character literal
-                if (previousCharacterTree != null) { // it's the root
-                    SyntaxTree concatTree = new SyntaxTree('+');
-                    if (previousCharacterTree.parentTree != null) { // previous is not the root
-                        previousCharacterTree.parentTree.replace(previousCharacterTree, concatTree);
-                    }
+                if (previousCharacterTree != null) { // current is not the root
+                    if (previousCharacterTree.content == '|') {
+                        previousCharacterTree.setRightTree(currentTree);
+                    } else {
+                        SyntaxTree concatTree = new SyntaxTree('+');
+                        if (previousCharacterTree.parentTree != null) { // previous is not the root
+                            previousCharacterTree.parentTree.replace(previousCharacterTree, concatTree);
+                        }
 
-                    concatTree.setLeftTree(previousCharacterTree);
-                    concatTree.setRightTree(currentTree);
+                        concatTree.setLeftTree(previousCharacterTree);
+                        concatTree.setRightTree(currentTree);
+                    }
                 }
             }
-            
+
             previousCharacterTree = currentTree;
         }
-        
+
         SyntaxTree root = previousCharacterTree;
         while (root.parentTree != null) {
             root = root.parentTree;
         }
         return root;
     }
-    
+
     public void printSyntaxTree() {
         printSyntaxTree(syntaxTree, 0);
     }
-    
+
     private void printSyntaxTree(SyntaxTree tree, int tabsIndented) {
         if (tree.leftTree != null) {
             printSyntaxTree(tree.leftTree, tabsIndented + 1);
