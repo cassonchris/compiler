@@ -139,7 +139,7 @@ public class RegularExpression {
             // the one to closure should be on the left
             fsm = fsmLeft.closure();
         } else if (tree.content == '+') {
-            fsm = NonDeterministicFSM.concat(fsmLeft, fsmRight);
+            fsm = fsmLeft.concat(fsmRight);
         } else if (tree.content == '|') {
             fsm = NonDeterministicFSM.union(fsmLeft, fsmRight);
         } else {
