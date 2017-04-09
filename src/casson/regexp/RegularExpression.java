@@ -141,7 +141,7 @@ public class RegularExpression {
         } else if (tree.content == '+') {
             fsm = fsmLeft.concat(fsmRight);
         } else if (tree.content == '|') {
-            fsm = NonDeterministicFSM.union(fsmLeft, fsmRight);
+            fsm = fsmLeft.union(fsmRight);
         } else {
             fsm = new NonDeterministicFSM(tree.content);
         }

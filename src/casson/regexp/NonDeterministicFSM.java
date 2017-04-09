@@ -84,7 +84,16 @@ class NonDeterministicFSM extends FiniteStateMachine {
         return this;
     }
 
-    static NonDeterministicFSM union(FiniteStateMachine fsmLeft, FiniteStateMachine fsmRight) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    NonDeterministicFSM union(NonDeterministicFSM fsmRight) {
+        NonDeterministicState leftInitialState = this.states.stream().filter(s -> s.initialState).findFirst().get();
+        NonDeterministicState rightInitialState = fsmRight.states.stream().filter(s -> s.initialState).findFirst().get();
+        
+        leftInitialState.mergeTransitions(rightInitialState.transitions);
+        leftInitialState.acceptingState = leftInitialState.acceptingState || rightInitialState.acceptingState;
+        
+        List<NonDeterministicState> rightStates = fsmRight.states.stream().filter(s -> s.acceptingState).collect(Collectors.toList());
+        this.states.addAll(rightStates);
+        
+        return this;
     }
 }
