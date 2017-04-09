@@ -124,26 +124,26 @@ public class RegularExpression {
         }
     }
     
-    private FiniteStateMachine generateFiniteStateMachine(SyntaxTree tree) {
-        FiniteStateMachine fsmLeft = null;
+    private NonDeterministicFSM generateFiniteStateMachine(SyntaxTree tree) {
+        NonDeterministicFSM fsmLeft = null;
         if (tree.leftTree != null) {
             fsmLeft = generateFiniteStateMachine(tree.leftTree);
         }
-        FiniteStateMachine fsmRight = null;
+        NonDeterministicFSM fsmRight = null;
         if (tree.rightTree != null) {
             fsmRight = generateFiniteStateMachine(tree.rightTree);
         }
         
-        FiniteStateMachine fsm;
+        NonDeterministicFSM fsm;
         if (tree.content == '*') {
             // the one to closure should be on the left
             fsm = fsmLeft.closure();
         } else if (tree.content == '+') {
-            fsm = FiniteStateMachine.concat(fsmLeft, fsmRight);
+            fsm = NonDeterministicFSM.concat(fsmLeft, fsmRight);
         } else if (tree.content == '|') {
-            fsm = FiniteStateMachine.union(fsmLeft, fsmRight);
+            fsm = NonDeterministicFSM.union(fsmLeft, fsmRight);
         } else {
-            fsm = new FiniteStateMachine(tree.content);
+            fsm = new NonDeterministicFSM(tree.content);
         }
         return fsm;
     }
