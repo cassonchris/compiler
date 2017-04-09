@@ -11,6 +11,7 @@ class NonDeterministicFSM extends FiniteStateMachine {
     
     private class NonDeterministicState extends State {
         
+        private boolean initialState;
         private Map<Character, List<State>> transitions;
 
         NonDeterministicState() {

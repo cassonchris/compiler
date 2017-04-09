@@ -4,7 +4,6 @@ abstract class FiniteStateMachine {
 
     abstract class State {
 
-        boolean initialState;
         boolean acceptingState;
 
         State() { }
