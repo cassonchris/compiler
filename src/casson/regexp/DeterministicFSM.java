@@ -1,25 +1,29 @@
 package casson.regexp;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 class DeterministicFSM extends FiniteStateMachine {
-    
-    private class DeterministicState extends State {
-        
-        private Map<Character, State> transitions;
+
+    static class DeterministicState extends State {
+
+        Map<Character, State> transitions;
 
         DeterministicState() {
             transitions = new HashMap<>();
         }
-                
+
         @Override
         void addTransition(Character input, State nextState) {
             transitions.put(input, nextState);
         }
     }
 
-    DeterministicFSM(Character character) {
+    State initialState;
+    Collection<DeterministicState> states;
+
+    DeterministicFSM() {
         super();
     }
 

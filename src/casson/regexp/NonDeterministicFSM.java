@@ -2,6 +2,7 @@ package casson.regexp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,10 +10,10 @@ import java.util.stream.Collectors;
 
 class NonDeterministicFSM extends FiniteStateMachine {
     
-    private class NonDeterministicState extends State {
+    static class NonDeterministicState extends State {
         
-        private boolean initialState;
-        private Map<Character, List<State>> transitions;
+        boolean initialState;
+        Map<Character, List<State>> transitions;
 
         NonDeterministicState() {
             transitions = new HashMap<>();
@@ -38,7 +39,7 @@ class NonDeterministicFSM extends FiniteStateMachine {
         }
     }
     
-    List<NonDeterministicState> states;
+    Collection<NonDeterministicState> states;
 
     NonDeterministicFSM(Character character) {
         super();

@@ -1,5 +1,12 @@
 package casson.regexp;
 
+import casson.regexp.DeterministicFSM.DeterministicState;
+import casson.regexp.NonDeterministicFSM.NonDeterministicState;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class RegularExpression {
 
     private class SyntaxTree {
@@ -37,7 +44,7 @@ public class RegularExpression {
 
     public RegularExpression(String expression) {
         syntaxTree = generateSyntaxTree(expression);
-        finiteStateMachine = generateFiniteStateMachine(syntaxTree);
+        finiteStateMachine = generateDeterministicFSM(syntaxTree);
     }
 
     private int getPrecedence(char a) {
@@ -124,14 +131,14 @@ public class RegularExpression {
         }
     }
     
-    private NonDeterministicFSM generateFiniteStateMachine(SyntaxTree tree) {
+    private NonDeterministicFSM generateNonDeterministicFSM(SyntaxTree tree) {
         NonDeterministicFSM fsmLeft = null;
         if (tree.leftTree != null) {
-            fsmLeft = generateFiniteStateMachine(tree.leftTree);
+            fsmLeft = generateNonDeterministicFSM(tree.leftTree);
         }
         NonDeterministicFSM fsmRight = null;
         if (tree.rightTree != null) {
-            fsmRight = generateFiniteStateMachine(tree.rightTree);
+            fsmRight = generateNonDeterministicFSM(tree.rightTree);
         }
         
         NonDeterministicFSM fsm;
@@ -146,5 +153,53 @@ public class RegularExpression {
             fsm = new NonDeterministicFSM(tree.content);
         }
         return fsm;
+    }
+    
+    private DeterministicFSM generateDeterministicFSM(SyntaxTree tree) {
+        NonDeterministicFSM nonDeterministicFSM = generateNonDeterministicFSM(tree);
+        List<NonDeterministicState> initialStates = nonDeterministicFSM.states.stream().filter(s -> s.initialState).collect(Collectors.toList());
+        if (initialStates.size() != 1) {
+            throw new IllegalArgumentException("Cannot construct DeterministicFSM from NonDeterministicFSM that doesn't have exactly one initial state.");
+        }
+        
+        NonDeterministicState oldInitialState = initialStates.get(0);
+        Map<String, DeterministicState> conversionMap = new HashMap<>();
+        DeterministicFSM fsm = new DeterministicFSM();
+        fsm.initialState = addConvertedState(conversionMap, String.valueOf(oldInitialState.hashCode()), oldInitialState);
+        
+        fsm.states = conversionMap.values();
+        return fsm;
+    }
+    
+    private DeterministicState addConvertedState(Map<String, DeterministicState> conversionMap, String key, NonDeterministicState state) {
+        if (conversionMap.containsKey(key)) {
+            return conversionMap.get(key);
+        } else {
+            DeterministicState newState = new DeterministicState();
+            newState.acceptingState = state.acceptingState;
+            conversionMap.put(key, newState);
+            for (Map.Entry<Character, List<FiniteStateMachine.State>> transition : state.transitions.entrySet()) {
+                Character character = transition.getKey();
+                List<FiniteStateMachine.State> transitionStates = transition.getValue();
+                
+                String transitionKey = "";
+                NonDeterministicState transitionState = new NonDeterministicState();
+                for (FiniteStateMachine.State s : transitionStates) {
+                    transitionKey += String.valueOf(s.hashCode()) + ",";
+                    NonDeterministicState ndState = (NonDeterministicState) s;
+                    transitionState.mergeTransitions(ndState.transitions);
+                }
+                int lastComma = transitionKey.lastIndexOf(",");
+                if (lastComma != -1) {
+                    transitionKey = transitionKey.substring(0, lastComma);
+                }
+                
+                transitionState.acceptingState = transitionStates.stream().anyMatch(s -> s.acceptingState);
+                
+                DeterministicState deterministicTransitionState = addConvertedState(conversionMap, transitionKey, transitionState);
+                newState.addTransition(character, deterministicTransitionState);
+            }
+            return newState;
+        }
     }
 }
