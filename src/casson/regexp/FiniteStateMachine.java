@@ -1,5 +1,8 @@
 package casson.regexp;
 
+import java.util.Collection;
+import java.util.Map;
+
 abstract class FiniteStateMachine {
 
     abstract class State {
@@ -10,6 +13,7 @@ abstract class FiniteStateMachine {
 
         abstract void addTransition(Character input, State nextState);
         abstract State nextState(Character input);
+        abstract Map<Character, Collection<State>> getTransitionsInNonDeterministicForm();
     }
 
     FiniteStateMachine() {}

@@ -31,6 +31,11 @@ class NonDeterministicFSM extends FiniteStateMachine {
             transitions.get(input).add(nextState);
         }
         
+        @Override
+        Map<Character, Collection<State>> getTransitionsInNonDeterministicForm() {
+            return transitions;
+        }
+        
         void mergeTransitions(Map<Character, Collection<State>> newTransitions) {
             for (Map.Entry<Character, Collection<State>> entrySet : newTransitions.entrySet()) {
                 Character character = entrySet.getKey();

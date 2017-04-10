@@ -1,6 +1,7 @@
 package casson.regexp;
 
 import casson.regexp.DeterministicFSM.DeterministicState;
+import casson.regexp.FiniteStateMachine.State;
 import casson.regexp.NonDeterministicFSM.NonDeterministicState;
 import java.util.Collection;
 import java.util.HashMap;
@@ -179,16 +180,15 @@ public class RegularExpression {
             DeterministicState newState = new DeterministicState();
             newState.acceptingState = state.acceptingState;
             conversionMap.put(key, newState);
-            for (Map.Entry<Character, Collection<FiniteStateMachine.State>> transition : state.transitions.entrySet()) {
+            for (Map.Entry<Character, Collection<State>> transition : state.transitions.entrySet()) {
                 Character character = transition.getKey();
-                Collection<FiniteStateMachine.State> transitionStates = transition.getValue();
+                Collection<State> transitionStates = transition.getValue();
                 
                 String transitionKey = "";
                 NonDeterministicState transitionState = new NonDeterministicState();
-                for (FiniteStateMachine.State s : transitionStates) {
+                for (State s : transitionStates) {
                     transitionKey += String.valueOf(s.hashCode()) + ",";
-                    NonDeterministicState ndState = (NonDeterministicState) s;
-                    transitionState.mergeTransitions(ndState.transitions);
+                    transitionState.mergeTransitions(s.getTransitionsInNonDeterministicForm());
                 }
                 int lastComma = transitionKey.lastIndexOf(",");
                 if (lastComma != -1) {

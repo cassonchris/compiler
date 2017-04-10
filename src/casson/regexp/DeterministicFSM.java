@@ -1,5 +1,6 @@
 package casson.regexp;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,17 @@ class DeterministicFSM extends FiniteStateMachine {
         @Override
         State nextState(Character input) {
             return transitions.get(input);
+        }
+
+        @Override
+        Map<Character, Collection<State>> getTransitionsInNonDeterministicForm() {
+            Map<Character, Collection<State>> nonDeterministicTransitions = new HashMap<>();
+            for (Map.Entry<Character, State> entrySet : transitions.entrySet()) {
+                Character character = entrySet.getKey();
+                State nextState = entrySet.getValue();
+                nonDeterministicTransitions.put(character, Arrays.asList(nextState));
+            }
+            return nonDeterministicTransitions;
         }
     }
 
