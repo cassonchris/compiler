@@ -83,17 +83,43 @@ public class RegularExpression {
                     throw new IllegalArgumentException(expression + " is not a valid regular expression.");
                 }
                 while (previousCharacterTree.parentTree != null
-                        && getPrecedence(previousCharacterTree.content) > getPrecedence(previousCharacterTree.parentTree.content)) {
+                        && getPrecedence(previousCharacterTree.content) > getPrecedence(previousCharacterTree.parentTree.content)
+                        && previousCharacterTree.parentTree.content != '(') {
                     previousCharacterTree = previousCharacterTree.parentTree;
                 }
                 if (previousCharacterTree.parentTree != null) {
                     previousCharacterTree.parentTree.replace(previousCharacterTree, currentTree);
                 }
                 currentTree.setLeftTree(previousCharacterTree);
+            } else if (character == ')') {
+                SyntaxTree leftParen = previousCharacterTree;
+                while (leftParen.parentTree != null
+                        && leftParen.content != '(') {
+                    leftParen = leftParen.parentTree;
+                }
+                
+                if (leftParen.parentTree == null) {
+                    leftParen.leftTree.parentTree = null;
+                } else {
+                    leftParen.parentTree.replace(leftParen, leftParen.leftTree);
+                }
+                currentTree = leftParen.leftTree;
             } else { // character literal
                 if (previousCharacterTree != null) { // current is not the root
                     if (previousCharacterTree.content == '|') {
-                        previousCharacterTree.setRightTree(currentTree);
+                        if (previousCharacterTree.rightTree == null) {
+                            previousCharacterTree.setRightTree(currentTree);
+                        } else {
+                            SyntaxTree concatTree = new SyntaxTree('+');
+                            if (previousCharacterTree.parentTree != null) { // previous is not the root
+                                previousCharacterTree.parentTree.replace(previousCharacterTree, concatTree);
+                            }
+
+                            concatTree.setLeftTree(previousCharacterTree);
+                            concatTree.setRightTree(currentTree);
+                        }
+                    } else if (previousCharacterTree.content == '(') {
+                        previousCharacterTree.setLeftTree(currentTree);
                     } else {
                         SyntaxTree concatTree = new SyntaxTree('+');
                         if (previousCharacterTree.parentTree != null) { // previous is not the root
