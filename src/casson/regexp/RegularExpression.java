@@ -202,4 +202,8 @@ public class RegularExpression {
             return newState;
         }
     }
+    
+    public boolean accepts(String input) {
+        return finiteStateMachine.accepts(input);
+    }
 }

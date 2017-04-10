@@ -9,7 +9,10 @@ abstract class FiniteStateMachine {
         State() { }
 
         abstract void addTransition(Character input, State nextState);
+        abstract State nextState(Character input);
     }
 
     FiniteStateMachine() {}
+    
+    abstract boolean accepts(String input);
 }

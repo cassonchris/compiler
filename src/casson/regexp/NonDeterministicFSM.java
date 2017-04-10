@@ -9,6 +9,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 class NonDeterministicFSM extends FiniteStateMachine {
+
+    @Override
+    boolean accepts(String input) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     static class NonDeterministicState extends State {
         
@@ -36,6 +41,11 @@ class NonDeterministicFSM extends FiniteStateMachine {
                     addTransition(character, state);
                 }
             }
+        }
+
+        @Override
+        State nextState(Character input) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
     }
     
