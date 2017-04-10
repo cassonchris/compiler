@@ -2,6 +2,7 @@ package casson.regexp;
 
 import casson.regexp.DeterministicFSM.DeterministicState;
 import casson.regexp.NonDeterministicFSM.NonDeterministicState;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -178,9 +179,9 @@ public class RegularExpression {
             DeterministicState newState = new DeterministicState();
             newState.acceptingState = state.acceptingState;
             conversionMap.put(key, newState);
-            for (Map.Entry<Character, List<FiniteStateMachine.State>> transition : state.transitions.entrySet()) {
+            for (Map.Entry<Character, Collection<FiniteStateMachine.State>> transition : state.transitions.entrySet()) {
                 Character character = transition.getKey();
-                List<FiniteStateMachine.State> transitionStates = transition.getValue();
+                Collection<FiniteStateMachine.State> transitionStates = transition.getValue();
                 
                 String transitionKey = "";
                 NonDeterministicState transitionState = new NonDeterministicState();

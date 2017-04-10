@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -18,7 +17,7 @@ class NonDeterministicFSM extends FiniteStateMachine {
     static class NonDeterministicState extends State {
         
         boolean initialState;
-        Map<Character, List<State>> transitions;
+        Map<Character, Collection<State>> transitions;
 
         NonDeterministicState() {
             transitions = new HashMap<>();
@@ -32,10 +31,10 @@ class NonDeterministicFSM extends FiniteStateMachine {
             transitions.get(input).add(nextState);
         }
         
-        void mergeTransitions(Map<Character, List<State>> newTransitions) {
-            for (Map.Entry<Character, List<State>> entrySet : newTransitions.entrySet()) {
+        void mergeTransitions(Map<Character, Collection<State>> newTransitions) {
+            for (Map.Entry<Character, Collection<State>> entrySet : newTransitions.entrySet()) {
                 Character character = entrySet.getKey();
-                List<State> transitionStates = entrySet.getValue();
+                Collection<State> transitionStates = entrySet.getValue();
                 
                 for (State state : transitionStates) {
                     addTransition(character, state);
@@ -66,8 +65,8 @@ class NonDeterministicFSM extends FiniteStateMachine {
 
     NonDeterministicFSM closure() {
         NonDeterministicState mergedInitialState = new NonDeterministicState();
-        List<NonDeterministicState> initialStates = states.stream().filter(s -> s.initialState).collect(Collectors.toList());
-        List<NonDeterministicState> acceptingStates = states.stream().filter(s -> s.acceptingState).collect(Collectors.toList());
+        Collection<NonDeterministicState> initialStates = states.stream().filter(s -> s.initialState).collect(Collectors.toList());
+        Collection<NonDeterministicState> acceptingStates = states.stream().filter(s -> s.acceptingState).collect(Collectors.toList());
         for (NonDeterministicState initialState : initialStates) {
             mergedInitialState.mergeTransitions(initialState.transitions);
             initialState.acceptingState = true;
@@ -81,7 +80,7 @@ class NonDeterministicFSM extends FiniteStateMachine {
     }
 
     NonDeterministicFSM concat(NonDeterministicFSM fsmRight) {
-        List<NonDeterministicState> leftAcceptingStates = this.states.stream().filter(s -> s.acceptingState).collect(Collectors.toList());
+        Collection<NonDeterministicState> leftAcceptingStates = this.states.stream().filter(s -> s.acceptingState).collect(Collectors.toList());
         NonDeterministicState rightInitialState = fsmRight.states.stream().filter(s -> s.initialState).findFirst().get();
         
         for (NonDeterministicState leftAcceptingState : leftAcceptingStates) {
@@ -89,7 +88,7 @@ class NonDeterministicFSM extends FiniteStateMachine {
             leftAcceptingState.acceptingState = rightInitialState.acceptingState;
         }
         
-        List<NonDeterministicState> newStates = fsmRight.states.stream().filter(s -> !s.initialState).collect(Collectors.toList());
+        Collection<NonDeterministicState> newStates = fsmRight.states.stream().filter(s -> !s.initialState).collect(Collectors.toList());
         
         this.states.addAll(newStates);
         
@@ -103,7 +102,7 @@ class NonDeterministicFSM extends FiniteStateMachine {
         leftInitialState.mergeTransitions(rightInitialState.transitions);
         leftInitialState.acceptingState = leftInitialState.acceptingState || rightInitialState.acceptingState;
         
-        List<NonDeterministicState> rightStates = fsmRight.states.stream().filter(s -> s.acceptingState).collect(Collectors.toList());
+        Collection<NonDeterministicState> rightStates = fsmRight.states.stream().filter(s -> s.acceptingState).collect(Collectors.toList());
         this.states.addAll(rightStates);
         
         return this;
