@@ -5,7 +5,7 @@ import java.util.Map;
 
 abstract class FiniteStateMachine {
 
-    abstract class State {
+    static abstract class State {
 
         boolean acceptingState;
 
