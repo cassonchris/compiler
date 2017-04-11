@@ -8,11 +8,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 class NonDeterministicFSM extends FiniteStateMachine {
-
-    @Override
-    boolean accepts(String input) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
     
     static class NonDeterministicState extends State {
         
@@ -48,8 +43,8 @@ class NonDeterministicFSM extends FiniteStateMachine {
         }
 
         @Override
-        State nextState(Character input) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Collection<State> getNextStateInNonDeterministicForm(Character input) {
+            return transitions.get(input);
         }
     }
     
@@ -66,6 +61,11 @@ class NonDeterministicFSM extends FiniteStateMachine {
         initialState.addTransition(character, acceptingState);
         
         states = new ArrayList<>(Arrays.asList(initialState, acceptingState));
+    }
+
+    @Override
+    Collection<State> getInitialStates() {
+        return states.stream().filter(s -> s.initialState).collect(Collectors.toList());
     }
 
     NonDeterministicFSM closure() {
