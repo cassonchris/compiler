@@ -20,7 +20,7 @@ public class GrammarTest {
 
     public GrammarTest() {
     }
-
+    
     @Test
     public void testAccepts() {
         Map<Integer, Map.Entry<NonTerminal, List<Symbol>>> productions = new HashMap<>();

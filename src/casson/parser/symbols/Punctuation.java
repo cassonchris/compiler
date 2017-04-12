@@ -1,7 +1,8 @@
 package casson.parser.symbols;
 
 public enum Punctuation implements Terminal, Token {
-    EOF;
+    EOF,
+    DOT;
     
     @Override
     public Terminal getTerminalType() {

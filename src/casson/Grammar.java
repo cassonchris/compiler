@@ -1,6 +1,7 @@
 package casson;
 
 import casson.parser.symbols.NonTerminal;
+import casson.parser.symbols.Punctuation;
 import casson.parser.symbols.Symbol;
 import casson.parser.symbols.Token;
 import casson.parser.tables.Action;
@@ -8,10 +9,15 @@ import casson.parser.tables.ActionKey;
 import casson.parser.tables.ActionValue;
 import casson.parser.tables.GotoKey;
 import casson.parser.tables.LRTable;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class Grammar {
 
@@ -24,6 +30,40 @@ public class Grammar {
         // TODO - generate the LRTable
     }
     
+    private Set<Map.Entry<NonTerminal, List<Symbol>>> closure(Set<Map.Entry<NonTerminal, List<Symbol>>> iSet) {
+        Set<Map.Entry<NonTerminal, List<Symbol>>> closuredProductions = new HashSet<>(iSet);
+        for (Map.Entry<NonTerminal, List<Symbol>> production : iSet) {
+            List<Symbol> productionValue = production.getValue();
+            
+            Symbol dot = productionValue.stream()
+                    .filter(s -> s.equals(Punctuation.DOT)).findFirst().get();
+            Symbol symbolAfterDot;
+            int symbolAfterDotIndex = productionValue.indexOf(dot) + 1;
+            if (symbolAfterDotIndex > 0
+                    && productionValue.size() > symbolAfterDotIndex) {
+                symbolAfterDot = productionValue.get(symbolAfterDotIndex);
+            } else {
+                return closuredProductions;
+            }
+            
+            if (symbolAfterDot instanceof NonTerminal) {
+                Set<Map.Entry<NonTerminal, List<Symbol>>> symbolAfterDotProductions = productions.values().stream()
+                                .filter(p -> p.getKey().equals(symbolAfterDot)).collect(Collectors.toSet());
+                Set<Map.Entry<NonTerminal, List<Symbol>>> dottedProductions = new HashSet<>();
+                for (Map.Entry<NonTerminal, List<Symbol>> originalProduction : symbolAfterDotProductions) {
+                    Map.Entry<NonTerminal, List<Symbol>> newProduction = new AbstractMap.SimpleEntry<>(originalProduction.getKey(), new ArrayList<Symbol>());
+                    newProduction.getValue().add(Punctuation.DOT);
+                    newProduction.getValue().addAll(originalProduction.getValue());
+                    dottedProductions.add(newProduction);
+                }
+                closuredProductions.addAll(
+                        closure(dottedProductions)
+                );
+            }
+        }
+        return closuredProductions;
+    }
+      
     public boolean accepts(List<Token> inputTokens) {
         Stack<Integer> stateStack = new Stack<>();
         stateStack.push(0);
