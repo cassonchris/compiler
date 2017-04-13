@@ -1,6 +1,8 @@
 package casson;
 
 import casson.parser.symbols.NonTerminal;
+import casson.parser.symbols.Operand;
+import casson.parser.symbols.Operator;
 import casson.parser.symbols.Punctuation;
 import casson.parser.symbols.Symbol;
 import casson.parser.symbols.Token;
@@ -11,6 +13,8 @@ import casson.parser.tables.GotoKey;
 import casson.parser.tables.LRTable;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,9 +28,16 @@ public class Grammar {
 
     private final Map<Integer, Map.Entry<NonTerminal, List<Symbol>>> productions;
     private LRTable table;
+    private final Collection<Symbol> symbols;
 
     public Grammar(Map<Integer, Map.Entry<NonTerminal, List<Symbol>>> productions) {
         this.productions = productions;
+        
+        symbols = new ArrayList<>();
+        symbols.addAll(Arrays.asList(NonTerminal.values()));
+        symbols.addAll(Arrays.asList(Operand.values()));
+        symbols.addAll(Arrays.asList(Operator.values()));
+        symbols.addAll(Arrays.asList(Punctuation.values()));
         
         // TODO - generate the LRTable
     }
@@ -47,7 +58,8 @@ public class Grammar {
                 return closuredProductions;
             }
             
-            if (symbolAfterDot instanceof NonTerminal) {
+            if (symbolAfterDot instanceof NonTerminal
+                    && symbolAfterDot != production.getKey()) {
                 Set<Map.Entry<NonTerminal, List<Symbol>>> symbolAfterDotProductions = productions.values().stream()
                                 .filter(p -> p.getKey().equals(symbolAfterDot)).collect(Collectors.toSet());
                 Set<Map.Entry<NonTerminal, List<Symbol>>> dottedProductions = new HashSet<>();
@@ -77,14 +89,47 @@ public class Grammar {
             int symbolAfterDotIndex = dotIndex + 1;
             
             if (symbolAfterDotIndex > 0
-                    && productionValue.size() > symbolAfterDotIndex) {
-                Collections.swap(productionValue, dotIndex, symbolAfterDotIndex);
+                    && productionValue.size() > symbolAfterDotIndex
+                    && productionValue.get(symbolAfterDotIndex).equals(symbol)) {
+                Map.Entry<NonTerminal, List<Symbol>> gotoItem = new AbstractMap.SimpleEntry<>(iEntry.getKey(), new ArrayList<Symbol>());
+                gotoItem.getValue().addAll(iEntry.getValue());
+                
+                Collections.swap(gotoItem.getValue(), dotIndex, symbolAfterDotIndex);
 
-                gotoSet.add(iEntry);
+                gotoSet.add(gotoItem);
             }
         }
         
         return closure(gotoSet);
+    }
+    
+    Set<Set<Map.Entry<NonTerminal, List<Symbol>>>> getItems() {
+        Set<Set<Map.Entry<NonTerminal, List<Symbol>>>> items = new HashSet<>();
+        
+        // get the first production
+        Map.Entry<NonTerminal, List<Symbol>> firstProduction = productions.get(0); // for zero based indexing
+        if (firstProduction == null) {
+            // if the user started at 1
+            firstProduction = productions.get(1);
+        }
+        
+        Map.Entry<NonTerminal, List<Symbol>> dottedFirstProduction = new AbstractMap.SimpleEntry<>(firstProduction.getKey(), new ArrayList<Symbol>());
+        dottedFirstProduction.getValue().add(Punctuation.DOT);
+        dottedFirstProduction.getValue().addAll(firstProduction.getValue());
+        dottedFirstProduction.getValue().add(Punctuation.EOF);
+        
+        addItems(items, closure(new HashSet<>(Arrays.asList(dottedFirstProduction))));
+        return items;
+    }
+    
+    private void addItems(Set<Set<Map.Entry<NonTerminal, List<Symbol>>>> itemSet, Set<Map.Entry<NonTerminal, List<Symbol>>> productionSet) {
+        itemSet.add(productionSet);
+        for (Symbol symbol : symbols) {
+            Set<Map.Entry<NonTerminal, List<Symbol>>> gotoSet = getGoto(productionSet, symbol);
+            if (!gotoSet.isEmpty() && !itemSet.contains(gotoSet)) {
+                addItems(itemSet, gotoSet);
+            }
+        }
     }
     
     public boolean accepts(List<Token> inputTokens) {

@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -31,9 +32,9 @@ public class GrammarTest {
         productions.put(2, new AbstractMap.SimpleEntry<>(
                 NonTerminal.EXPRESSION,
                 new ArrayList<>(Arrays.asList(
-                                NonTerminal.TERM,
+                                NonTerminal.EXPRESSION,
                                 Operator.PLUS,
-                                NonTerminal.EXPRESSION))));
+                                NonTerminal.TERM))));
         productions.put(3, new AbstractMap.SimpleEntry<>(
                 NonTerminal.EXPRESSION,
                 new ArrayList<>(Arrays.asList(
@@ -41,17 +42,13 @@ public class GrammarTest {
         productions.put(4, new AbstractMap.SimpleEntry<>(
                 NonTerminal.TERM,
                 new ArrayList<>(Arrays.asList(
-                                NonTerminal.FACTOR,
-                                Operator.MULTIPLY,
-                                NonTerminal.TERM))));
+                                Operand.ID))));
         productions.put(5, new AbstractMap.SimpleEntry<>(
                 NonTerminal.TERM,
                 new ArrayList<>(Arrays.asList(
-                                NonTerminal.FACTOR))));
-        productions.put(6, new AbstractMap.SimpleEntry<>(
-                NonTerminal.FACTOR,
-                new ArrayList<>(Arrays.asList(
-                                Operand.ID))));
+                                Punctuation.LEFTPAREN,
+                                NonTerminal.EXPRESSION,
+                                Punctuation.RIGHTPAREN))));
 
         Grammar grammar = new Grammar(productions);
 
@@ -64,5 +61,8 @@ public class GrammarTest {
         tokens.add(Punctuation.EOF);
 
         assertTrue(grammar.accepts(tokens));
+        
+        Set<Set<Map.Entry<NonTerminal, List<Symbol>>>> items = grammar.getItems();
+        System.out.println(items);
     }
 }
