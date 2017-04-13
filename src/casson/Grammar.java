@@ -11,6 +11,7 @@ import casson.parser.tables.GotoKey;
 import casson.parser.tables.LRTable;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -63,7 +64,29 @@ public class Grammar {
         }
         return closuredProductions;
     }
-      
+    
+    private Set<Map.Entry<NonTerminal, List<Symbol>>> getGoto(Set<Map.Entry<NonTerminal, List<Symbol>>> iSet, Symbol symbol) {
+        Set<Map.Entry<NonTerminal, List<Symbol>>> gotoSet = new HashSet<>();
+        
+        for (Map.Entry<NonTerminal, List<Symbol>> iEntry : iSet) {
+            List<Symbol> productionValue = iEntry.getValue();
+            Symbol dot = productionValue.stream()
+                    .filter(s -> s.equals(Punctuation.DOT)).findFirst().get();
+            
+            int dotIndex = productionValue.indexOf(dot);
+            int symbolAfterDotIndex = dotIndex + 1;
+            
+            if (symbolAfterDotIndex > 0
+                    && productionValue.size() > symbolAfterDotIndex) {
+                Collections.swap(productionValue, dotIndex, symbolAfterDotIndex);
+
+                gotoSet.add(iEntry);
+            }
+        }
+        
+        return closure(gotoSet);
+    }
+    
     public boolean accepts(List<Token> inputTokens) {
         Stack<Integer> stateStack = new Stack<>();
         stateStack.push(0);
