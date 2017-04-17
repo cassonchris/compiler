@@ -1,5 +1,6 @@
 package casson;
 
+import casson.parser.symbols.Epsilon;
 import casson.parser.symbols.NonTerminal;
 import casson.parser.symbols.Operand;
 import casson.parser.symbols.Operator;
@@ -210,6 +211,51 @@ public class Grammar {
         }
     }
 
+    Set<Terminal> first(Symbol symbol, int k) {
+        if (symbol instanceof Terminal) {
+            return new HashSet<>(Arrays.asList((Terminal)symbol));
+        }
+
+        Set<Terminal> firstSet = new HashSet<>();
+
+        Set<Production> symbolProductions = productions.values().stream()
+                .filter(p -> p.getHead().equals(symbol)).collect(Collectors.toSet());
+
+        for (Production symbolProduction : symbolProductions) {
+            if (symbolProduction.getBody().size() == 1 && symbolProduction.getBody().get(0).equals(Epsilon.E)) {
+                firstSet.add(Epsilon.E);
+            } else {
+                Symbol y1Symbol = symbolProduction.getBody().get(0);
+                if (!y1Symbol.equals(symbol)) {
+                    Set<Terminal> y1Set = first(y1Symbol, k);
+                    y1Set.remove(Epsilon.E);
+                    firstSet.addAll(y1Set);
+                }
+
+                for (int i = 1; i <= k && i < symbolProduction.getBody().size(); i++) {
+                    Symbol yiSymbol = symbolProduction.getBody().get(i);
+                    if (!yiSymbol.equals(symbol)) {
+                        Set<Terminal> yiSet = first(yiSymbol, k);
+                        if (yiSet.contains(Epsilon.E)) {
+                            yiSet.remove(Epsilon.E);
+                            firstSet.addAll(yiSet);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                
+                if (symbolProduction.getBody().stream()
+                        .filter(s -> !s.equals(symbol))
+                        .allMatch(s -> first(s, k).contains(Epsilon.E))) {
+                    firstSet.add(Epsilon.E);
+                }
+            }
+        }
+        
+        return firstSet;
+    }
+
     public boolean accepts(List<Token> inputTokens) {
         Stack<Integer> stateStack = new Stack<>();
         stateStack.push(0);
@@ -231,7 +277,7 @@ public class Grammar {
             } else if (action.getAction() == Action.SHIFT) {
                 System.out.println("Shift " + action.getNumber());
                 stateStack.push(action.getNumber());
-                
+
                 if (tokenIterator.hasNext()) {
                     token = tokenIterator.next();
                 } else {
@@ -272,11 +318,11 @@ public class Grammar {
             for (Symbol s : symbols) {
                 Set<Production> gotoSet = getGoto(itemSet, s);
                 if (!gotoSet.isEmpty()) {
-                        Integer gotoId = items.getItemSetId(gotoSet);
+                    Integer gotoId = items.getItemSetId(gotoSet);
                     if (s instanceof Terminal) {
                         actionMap.put(new ActionKey(itemId, (Terminal) s), new ActionValue(Action.SHIFT, gotoId));
                     } else if (s instanceof NonTerminal) {
-                        gotoMap.put(new GotoKey(itemId, (NonTerminal)s), gotoId);
+                        gotoMap.put(new GotoKey(itemId, (NonTerminal) s), gotoId);
                     }
                 }
             }
