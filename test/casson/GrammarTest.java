@@ -126,6 +126,42 @@ public class GrammarTest {
         Set<Terminal> first = grammar.first(NonTerminal.EXPRESSION, 1);
         
         System.out.println();
+        System.out.println("First Set:");
         System.out.println(first);
+    }
+    
+    @Test
+    public void testFollow() {
+        Map<Integer, Grammar.Production> productions = new HashMap<>();
+        productions.put(1, new Grammar.Production(
+                NonTerminal.GOAL,
+                NonTerminal.EXPRESSION));
+        productions.put(2, new Grammar.Production(
+                NonTerminal.EXPRESSION,
+                NonTerminal.TERM,
+                Operator.PLUS,
+                NonTerminal.EXPRESSION));
+        productions.put(3, new Grammar.Production(
+                NonTerminal.EXPRESSION,
+                NonTerminal.TERM));
+        productions.put(4, new Grammar.Production(
+                NonTerminal.TERM,
+                NonTerminal.FACTOR,
+                Operator.MULTIPLY,
+                NonTerminal.TERM));
+        productions.put(5, new Grammar.Production(
+                NonTerminal.TERM,
+                NonTerminal.FACTOR));
+        productions.put(6, new Grammar.Production(
+                NonTerminal.FACTOR, 
+                Operand.ID));
+
+        Grammar grammar = new Grammar(productions);
+        
+        Set<Terminal> followSet = grammar.follow(Operand.ID, 1);
+        
+        System.out.println();
+        System.out.println("Follow Set:");
+        System.out.println(followSet);
     }
 }

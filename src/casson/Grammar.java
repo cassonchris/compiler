@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -213,7 +214,7 @@ public class Grammar {
 
     Set<Terminal> first(Symbol symbol, int k) {
         if (symbol instanceof Terminal) {
-            return new HashSet<>(Arrays.asList((Terminal)symbol));
+            return new HashSet<>(Arrays.asList((Terminal) symbol));
         }
 
         Set<Terminal> firstSet = new HashSet<>();
@@ -244,7 +245,7 @@ public class Grammar {
                         }
                     }
                 }
-                
+
                 if (symbolProduction.getBody().stream()
                         .filter(s -> !s.equals(symbol))
                         .allMatch(s -> first(s, k).contains(Epsilon.E))) {
@@ -252,8 +253,50 @@ public class Grammar {
                 }
             }
         }
-        
+
         return firstSet;
+    }
+
+    Set<Terminal> follow(Symbol symbol, int k) {
+        Set<Terminal> followSet = new HashSet<>();
+
+        if (symbol.equals(NonTerminal.GOAL)) {
+            followSet.add(Punctuation.EOF);
+        }
+
+        Collection<Production> symbolProductions = productions.values().stream()
+                .filter(p -> p.getBody().contains(symbol)).collect(Collectors.toList());
+
+        for (Production symbolProduction : symbolProductions) {
+            ListIterator<Symbol> currentSymbolIterator = symbolProduction.getBody().listIterator();
+
+            while (currentSymbolIterator.hasNext()) {
+                Symbol currentSymbol = currentSymbolIterator.next();
+                if (currentSymbol.equals(symbol)) {
+                    ListIterator<Symbol> nextSymbolIterator = symbolProduction.getBody().listIterator(currentSymbolIterator.nextIndex());
+
+                    while (nextSymbolIterator.hasNext()) {
+                        Symbol nextSymbol = nextSymbolIterator.next();
+                        Set<Terminal> firstSet = first(nextSymbol, k);
+                        
+                        followSet.addAll(firstSet.stream().filter(t -> !t.equals(Epsilon.E)).collect(Collectors.toSet()));
+                        
+                        if (!firstSet.contains(Epsilon.E)) {
+                            break;
+                        }
+                    }
+                    
+                    if (!nextSymbolIterator.hasNext() 
+                            && !symbolProduction.getHead().equals(symbol)
+                            && (!currentSymbolIterator.hasNext()
+                                || first(nextSymbolIterator.previous(), k).contains(Epsilon.E))) {
+                        followSet.addAll(follow(symbolProduction.getHead(), k));
+                    }
+                }
+            }
+        }
+        
+        return followSet;
     }
 
     public boolean accepts(List<Token> inputTokens) {
