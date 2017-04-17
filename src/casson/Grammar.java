@@ -228,7 +228,7 @@ public class Grammar {
             } else if (action.getAction() == Action.ACCEPT) {
                 System.out.println("Accept");
                 return true;
-            } else if (action.getAction() == Action.SWITCH) {
+            } else if (action.getAction() == Action.SHIFT) {
                 System.out.println("Shift " + action.getNumber());
                 stateStack.push(action.getNumber());
                 
@@ -274,7 +274,7 @@ public class Grammar {
                 if (!gotoSet.isEmpty()) {
                         Integer gotoId = items.getItemSetId(gotoSet);
                     if (s instanceof Terminal) {
-                        actionMap.put(new ActionKey(itemId, (Terminal) s), new ActionValue(Action.SWITCH, gotoId));
+                        actionMap.put(new ActionKey(itemId, (Terminal) s), new ActionValue(Action.SHIFT, gotoId));
                     } else if (s instanceof NonTerminal) {
                         gotoMap.put(new GotoKey(itemId, (NonTerminal)s), gotoId);
                     }

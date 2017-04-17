@@ -1,5 +1,9 @@
 package casson.parser.tables;
 
+/**
+ * This class represents an action value in a LR table.
+ * @author Chris Casson
+ */
 public class ActionValue {
 
     private Action action;

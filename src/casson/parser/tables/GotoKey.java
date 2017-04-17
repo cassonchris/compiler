@@ -3,8 +3,10 @@ package casson.parser.tables;
 import casson.parser.symbols.NonTerminal;
 import java.util.Objects;
 
-
-
+/**
+ * This class represents the key used to look up a goto in a LR table.
+ * @author Chris Casson
+ */
 public class GotoKey {
 
     private int state;

@@ -3,6 +3,10 @@ package casson.parser.tables;
 import casson.parser.symbols.Terminal;
 import java.util.Objects;
 
+/**
+ * This class represents the key used to look up an action in a LR table.
+ * @author Chris Casson
+ */
 public class ActionKey {
 
     private int state;
