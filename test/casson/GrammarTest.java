@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -20,7 +19,7 @@ public class GrammarTest {
     }
 
     @Test
-    public void testAccepts() {
+    public void testK0Grammar() {
         Map<Integer, Grammar.Production> productions = new HashMap<>();
         productions.put(1, new Grammar.Production(
                 NonTerminal.GOAL,
@@ -44,23 +43,53 @@ public class GrammarTest {
 
         Grammar grammar = new Grammar(productions);
 
+        System.out.println("x + y + z");
+        System.out.println();
         List<Token> tokens = new ArrayList<>();
         tokens.add(new OperandToken(Operand.ID, "x"));
         tokens.add(Operator.PLUS);
         tokens.add(new OperandToken(Operand.ID, "y"));
-        tokens.add(Operator.MULTIPLY);
+        tokens.add(Operator.PLUS);
         tokens.add(new OperandToken(Operand.ID, "z"));
         tokens.add(Punctuation.EOF);
 
         assertTrue(grammar.accepts(tokens));
-
-        Set<Set<Grammar.Production>> items = grammar.getItems();
         
-        for (Set<Grammar.Production> itemSet : items) {
-            for (Grammar.Production production : itemSet) {
-                System.out.println(production);
-            }
-            System.out.println("");
-        }
+        System.out.println();
+        System.out.println("(x)");
+        System.out.println();
+        tokens = new ArrayList<>();
+        tokens.add(Punctuation.LEFTPAREN);
+        tokens.add(new OperandToken(Operand.ID, "x"));
+        tokens.add(Punctuation.RIGHTPAREN);
+        tokens.add(Punctuation.EOF);
+        
+        assertTrue(grammar.accepts(tokens));
+        
+        System.out.println();
+        System.out.println("(x + y)");
+        System.out.println();
+        tokens = new ArrayList<>();
+        tokens.add(Punctuation.LEFTPAREN);
+        tokens.add(new OperandToken(Operand.ID, "x"));
+        tokens.add(Operator.PLUS);
+        tokens.add(new OperandToken(Operand.ID, "y"));
+        tokens.add(Punctuation.RIGHTPAREN);
+        tokens.add(Punctuation.EOF);
+        
+        assertTrue(grammar.accepts(tokens));
+        
+        System.out.println();
+        System.out.println("(x - y)");
+        System.out.println();
+        tokens = new ArrayList<>();
+        tokens.add(Punctuation.LEFTPAREN);
+        tokens.add(new OperandToken(Operand.ID, "x"));
+        tokens.add(Operator.MINUS);
+        tokens.add(new OperandToken(Operand.ID, "y"));
+        tokens.add(Punctuation.RIGHTPAREN);
+        tokens.add(Punctuation.EOF);
+        
+        assertFalse(grammar.accepts(tokens));
     }
 }
