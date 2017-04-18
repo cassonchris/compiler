@@ -58,4 +58,9 @@ public class GotoKey {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "[ state = " + state + ", nonTerminal = " + nonTerminal + " ]";
+    }
 }

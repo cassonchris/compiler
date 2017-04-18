@@ -58,4 +58,9 @@ public class ActionKey {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "[ state = " + state + ", terminal = " + terminal + " ]";
+    }
 }

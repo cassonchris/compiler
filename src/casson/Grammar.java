@@ -2,8 +2,6 @@ package casson;
 
 import casson.parser.symbols.Epsilon;
 import casson.parser.symbols.NonTerminal;
-import casson.parser.symbols.Operand;
-import casson.parser.symbols.Operator;
 import casson.parser.symbols.Punctuation;
 import casson.parser.symbols.Symbol;
 import casson.parser.symbols.Terminal;
@@ -88,16 +86,17 @@ public class Grammar {
 
     private final Map<Integer, Production> productions;
     private final LRTable table;
-    private final Collection<Symbol> symbols;
+    private final Set<Symbol> symbols;
 
     public Grammar(Map<Integer, Production> productions) {
         this.productions = productions;
 
-        symbols = new ArrayList<>();
-        symbols.addAll(Arrays.asList(NonTerminal.values()));
-        symbols.addAll(Arrays.asList(Operand.values()));
-        symbols.addAll(Arrays.asList(Operator.values()));
-        symbols.addAll(Arrays.asList(Punctuation.values()));
+        symbols = new HashSet<>();
+        for (Production production : productions.values()) {
+            symbols.add(production.getHead());
+            symbols.addAll(production.getBody());
+        }
+        symbols.add(Punctuation.EOF);
 
         table = generateLRTable();
     }
@@ -278,24 +277,24 @@ public class Grammar {
                     while (nextSymbolIterator.hasNext()) {
                         Symbol nextSymbol = nextSymbolIterator.next();
                         Set<Terminal> firstSet = first(nextSymbol, k);
-                        
+
                         followSet.addAll(firstSet.stream().filter(t -> !t.equals(Epsilon.E)).collect(Collectors.toSet()));
-                        
+
                         if (!firstSet.contains(Epsilon.E)) {
                             break;
                         }
                     }
-                    
-                    if (!nextSymbolIterator.hasNext() 
+
+                    if (!nextSymbolIterator.hasNext()
                             && !symbolProduction.getHead().equals(symbol)
                             && (!currentSymbolIterator.hasNext()
-                                || first(nextSymbolIterator.previous(), k).contains(Epsilon.E))) {
+                            || first(nextSymbolIterator.previous(), k).contains(Epsilon.E))) {
                         followSet.addAll(follow(symbolProduction.getHead(), k));
                     }
                 }
             }
         }
-        
+
         return followSet;
     }
 
@@ -312,13 +311,17 @@ public class Grammar {
             ActionKey actionKey = new ActionKey(state, token.getTerminalType());
             ActionValue action = table.getAction(actionKey);
 
+            System.out.print(actionKey);
+            System.out.print(" -> ");
+            System.out.print(action);
+
             if (action == null) {
+                System.out.println();
                 return false;
             } else if (action.getAction() == Action.ACCEPT) {
-                System.out.println("Accept");
+                System.out.println();
                 return true;
             } else if (action.getAction() == Action.SHIFT) {
-                System.out.println("Shift " + action.getNumber());
                 stateStack.push(action.getNumber());
 
                 if (tokenIterator.hasNext()) {
@@ -329,17 +332,26 @@ public class Grammar {
                 }
             } else if (action.getAction() == Action.REDUCE) {
                 Production production = productions.get(action.getNumber());
-                System.out.println("Reduce " + production);
                 int beta = production.getBody().size();
                 for (int i = 0; i < beta; i++) {
                     stateStack.pop();
                 }
                 state = stateStack.peek();
+
                 GotoKey gotoKey = new GotoKey(state, production.getHead());
                 int gotoState = table.getGotoState(gotoKey);
-                System.out.println("Go to " + gotoState);
                 stateStack.push(gotoState);
+
+                System.out.print(" (");
+                System.out.print(production);
+                System.out.print(")");
+                System.out.println();
+                System.out.print(gotoKey);
+                System.out.print(" -> ");
+                System.out.print("goto " + gotoState);
             }
+
+            System.out.println();
         }
     }
 

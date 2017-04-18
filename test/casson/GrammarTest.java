@@ -128,6 +128,7 @@ public class GrammarTest {
         System.out.println();
         System.out.println("First Set:");
         System.out.println(first);
+        System.out.println();
     }
     
     @Test
@@ -163,5 +164,6 @@ public class GrammarTest {
         System.out.println();
         System.out.println("Follow Set:");
         System.out.println(followSet);
+        System.out.println();
     }
 }
