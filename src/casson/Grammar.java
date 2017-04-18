@@ -323,13 +323,7 @@ public class Grammar {
                 return true;
             } else if (action.getAction() == Action.SHIFT) {
                 stateStack.push(action.getNumber());
-
-                if (tokenIterator.hasNext()) {
-                    token = tokenIterator.next();
-                } else {
-                    // when k = 0, the algorithm will try to use the token beyond EOF
-                    token = Punctuation.EOF;
-                }
+                token = tokenIterator.next();
             } else if (action.getAction() == Action.REDUCE) {
                 Production production = productions.get(action.getNumber());
                 int beta = production.getBody().size();
@@ -403,6 +397,13 @@ public class Grammar {
                             actionMap.put(new ActionKey(itemId, (Terminal) s), actionValue);
                         }
                     }
+                } else if (production.getBody().get(production.getBody().size() - 2).equals(Punctuation.DOT)
+                        && production.getBody().get(production.getBody().size() - 1).equals(Punctuation.EOF)) {
+                    Production productionNoDot = new Production(production.getHead(), new ArrayList<>());
+                    productionNoDot.getBody().addAll(production.getBody());
+                    productionNoDot.getBody().remove(Punctuation.DOT);
+                    Integer productionId = getProductionId(productionNoDot);
+                    actionMap.put(new ActionKey(itemId, Punctuation.EOF), new ActionValue(Action.ACCEPT, productionId));
                 }
             }
         }
