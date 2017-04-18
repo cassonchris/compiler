@@ -43,7 +43,7 @@ public class GrammarTest {
                 NonTerminal.EXPRESSION,
                 Punctuation.RIGHTPAREN));
 
-        Grammar grammar = new Grammar(productions);
+        Grammar grammar = new Grammar(productions, 0);
 
         System.out.println("x + y + z");
         System.out.println();
@@ -121,7 +121,7 @@ public class GrammarTest {
                 NonTerminal.FACTOR, 
                 Operand.ID));
 
-        Grammar grammar = new Grammar(productions);
+        Grammar grammar = new Grammar(productions, 1);
         
         Set<Terminal> first = grammar.first(NonTerminal.EXPRESSION, 1);
         
@@ -157,7 +157,7 @@ public class GrammarTest {
                 NonTerminal.FACTOR, 
                 Operand.ID));
 
-        Grammar grammar = new Grammar(productions);
+        Grammar grammar = new Grammar(productions, 1);
         
         Set<Terminal> followSet = grammar.follow(Operand.ID, 1);
         

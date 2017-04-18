@@ -88,7 +88,7 @@ public class Grammar {
     private final LRTable table;
     private final Set<Symbol> symbols;
 
-    public Grammar(Map<Integer, Production> productions) {
+    public Grammar(Map<Integer, Production> productions, int lookahead) {
         this.productions = productions;
 
         symbols = new HashSet<>();
@@ -98,7 +98,7 @@ public class Grammar {
         }
         symbols.add(Punctuation.EOF);
 
-        table = generateLRTable();
+        table = generateLRTable(lookahead);
     }
 
     private Integer getProductionId(Production production) {
@@ -349,7 +349,7 @@ public class Grammar {
         }
     }
 
-    private LRTable generateLRTable() {
+    private LRTable generateLRTable(int lookahead) {
         Map<ActionKey, ActionValue> actionMap = new HashMap<>();
         Map<GotoKey, Integer> gotoMap = new HashMap<>();
 
@@ -381,21 +381,15 @@ public class Grammar {
             // c) [s' -> s$.] in Ii
             //      action[i,a] = "accept", for all a
             for (Production production : itemSet) {
-                if (production.getBody().get(production.getBody().size() - 1).equals(Punctuation.DOT)) {
+                if (production.getBody().get(production.getBody().size() - 1).equals(Punctuation.DOT)
+                        && !production.getBody().get(production.getBody().size() - 2).equals(Punctuation.EOF)) {
                     Production productionNoDot = new Production(production.getHead(), new ArrayList<>());
                     productionNoDot.getBody().addAll(production.getBody());
                     productionNoDot.getBody().remove(Punctuation.DOT);
                     Integer productionId = getProductionId(productionNoDot);
-                    ActionValue actionValue;
-                    if (productionNoDot.getBody().get(productionNoDot.getBody().size() - 1).equals(Punctuation.EOF)) {
-                        actionValue = new ActionValue(Action.ACCEPT, productionId);
-                    } else {
-                        actionValue = new ActionValue(Action.REDUCE, productionId);
-                    }
-                    for (Symbol s : symbols) {
-                        if (s instanceof Terminal) {
-                            actionMap.put(new ActionKey(itemId, (Terminal) s), actionValue);
-                        }
+                    ActionValue actionValue = new ActionValue(Action.REDUCE, productionId);
+                    for (Terminal t : follow(production.getHead(), lookahead)) {
+                        actionMap.put(new ActionKey(itemId, t), actionValue);
                     }
                 } else if (production.getBody().get(production.getBody().size() - 2).equals(Punctuation.DOT)
                         && production.getBody().get(production.getBody().size() - 1).equals(Punctuation.EOF)) {
