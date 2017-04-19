@@ -386,38 +386,37 @@ public class Grammar {
         Set<Production> symbolProductions = productions.values().stream()
                 .filter(p -> p.getHead().equals(symbol)).collect(Collectors.toSet());
 
+        // if any of the productions are S->epsilon
+        if (symbolProductions.stream().anyMatch(p -> p.getBody().size() == 1 && p.getBody().get(0).equals(Epsilon.E))) {
+            firstSet.add(Epsilon.E);
+        }
+        
         // for each production
         for (Production symbolProduction : symbolProductions) {
-            // if the body (right side) of the production is epsilon ...
-            if (symbolProduction.getBody().size() == 1 && symbolProduction.getBody().get(0).equals(Epsilon.E)) {
+            // get the first set for the rest of the symbols
+            // until lookahead is reached or all symbols have been processed
+            // or a first set does not contain epsilon
+            for (int i = 0; i <= lookahead && i < symbolProduction.getBody().size(); i++) {
+                // get the symbol
+                Symbol yiSymbol = symbolProduction.getBody().get(i);
+                // get the first set for the symbol
+                Set<Terminal> yiSet = first(yiSymbol, lookahead);
+
+                // add everything from yiSet except for epsilon
+                firstSet.addAll(yiSet.stream().filter(t -> !t.equals(Epsilon.E)).collect(Collectors.toSet()));
+
+                // if yiSet contains epsilon ...
+                if (!yiSet.contains(Epsilon.E)) {
+                    // ... stop processing symbols
+                    break;
+                }
+            }
+
+            // if first(s) contains epsilon for all s in symbolProduction.body ...
+            if (symbolProduction.getBody().stream()
+                    .allMatch(s -> first(s, lookahead).contains(Epsilon.E))) {
                 // ... add epsilon to firstSet
                 firstSet.add(Epsilon.E);
-            } else {
-                // get the first set for the rest of the symbols
-                // until lookahead is reached or all symbols have been processed
-                // or a first set does not contain epsilon
-                for (int i = 0; i <= lookahead && i < symbolProduction.getBody().size(); i++) {
-                    // get the symbol
-                    Symbol yiSymbol = symbolProduction.getBody().get(i);
-                    // get the first set for the symbol
-                    Set<Terminal> yiSet = first(yiSymbol, lookahead);
-                    
-                    // add everything from yiSet except for epsilon
-                    firstSet.addAll(yiSet.stream().filter(t -> !t.equals(Epsilon.E)).collect(Collectors.toSet()));
-                    
-                    // if yiSet contains epsilon ...
-                    if (!yiSet.contains(Epsilon.E)) {
-                        // ... stop processing symbols
-                        break;
-                    }
-                }
-
-                // if first(s) contains epsilon for all s in symbolProduction.body ...
-                if (symbolProduction.getBody().stream()
-                        .allMatch(s -> first(s, lookahead).contains(Epsilon.E))) {
-                    // ... add epsilon to firstSet
-                    firstSet.add(Epsilon.E);
-                }
             }
         }
 
@@ -487,8 +486,8 @@ public class Grammar {
                     }
                     
                     // if follow should continue to the head (left side) of the production ...
-                    if (!nextSymbolIterator.hasNext()
-                            && (!currentSymbolIterator.hasNext()
+                    if (!nextSymbolIterator.hasNext() // it didn't stop processing symbols in the middle
+                            && (!currentSymbolIterator.hasNext() // the current symbol is at the end or first(last symbol) contains epsilon
                                 || first(nextSymbolIterator.previous(), lookahead).contains(Epsilon.E))) {
                         // ... add the follow set for the head symbol
                         followSet.addAll(follow(symbolProduction.getHead(), lookahead));
