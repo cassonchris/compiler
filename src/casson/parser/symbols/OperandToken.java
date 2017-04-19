@@ -30,4 +30,9 @@ public class OperandToken implements Token {
     public Terminal getTerminalType() {
         return operand;
     }
+    
+    @Override
+    public String toString() {
+        return "<" + operand + "," + value + ">";
+    }
 }

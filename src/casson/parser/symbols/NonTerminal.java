@@ -4,5 +4,10 @@ public enum NonTerminal implements Symbol {
     GOAL,
     EXPRESSION,
     TERM,
-    FACTOR
+    FACTOR;
+    
+    @Override
+    public String toString() {
+        return "<" + this.name() + ">";
+    }
 }

@@ -156,6 +156,13 @@ public class Grammar {
         // generate the LR(lookahead) table
         table = generateLRTable(lookahead);
     }
+    
+    /**
+     * Prints the action map and goto map for the LR table
+     */
+    public void printLRTable() {
+        System.out.println(table);
+    }
 
     /**
      * This method searches the productions map to find the id of the given production.
@@ -501,6 +508,11 @@ public class Grammar {
      * @return true if accepted, otherwise false
      */
     public boolean accepts(List<Token> inputTokens) {
+        // print the input tokens
+        System.out.print("Parsing ");
+        inputTokens.forEach(t -> System.out.print(t));
+        System.out.println();
+        
         // create the state stack and push 0
         Stack<Integer> stateStack = new Stack<>();
         stateStack.push(0);

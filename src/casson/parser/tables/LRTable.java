@@ -1,6 +1,8 @@
 package casson.parser.tables;
 
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * This class represents a LR table. It uses maps to hold the action and goto values.
@@ -45,5 +47,29 @@ public class LRTable {
         } else {
             return null;
         }
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder tableString = new StringBuilder();
+        
+        tableString.append("Action Map:").append(System.lineSeparator());
+        SortedMap<ActionKey, ActionValue> sortedActions = new TreeMap<>(actionMap);
+        for (Map.Entry<ActionKey, ActionValue> entrySet : sortedActions.entrySet()) {
+            ActionKey key = entrySet.getKey();
+            ActionValue value = entrySet.getValue();
+            tableString.append(key).append(" -> ").append(value).append(System.lineSeparator());
+        }
+        tableString.append(System.lineSeparator());
+        
+        tableString.append("Goto Map:").append(System.lineSeparator());
+        SortedMap<GotoKey, Integer> sortedGoto = new TreeMap<>(gotoMap);
+        for (Map.Entry<GotoKey, Integer> entrySet : sortedGoto.entrySet()) {
+            GotoKey key = entrySet.getKey();
+            Integer value = entrySet.getValue();
+            tableString.append(key).append(" -> ").append(value).append(System.lineSeparator());
+        }
+        
+        return tableString.toString();
     }
 }

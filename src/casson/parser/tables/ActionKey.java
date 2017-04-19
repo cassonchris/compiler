@@ -7,7 +7,7 @@ import java.util.Objects;
  * This class represents the key used to look up an action in a LR table.
  * @author Chris Casson
  */
-public class ActionKey {
+public class ActionKey implements Comparable<ActionKey> {
 
     private int state;
     private Terminal terminal;
@@ -62,5 +62,14 @@ public class ActionKey {
     @Override
     public String toString() {
         return "[ state = " + state + ", terminal = " + terminal + " ]";
+    }
+
+    @Override
+    public int compareTo(ActionKey o) {
+        if (this.state == o.state) {
+            return this.terminal.hashCode() - o.terminal.hashCode();
+        } else {
+            return this.state - o.state;
+        }
     }
 }

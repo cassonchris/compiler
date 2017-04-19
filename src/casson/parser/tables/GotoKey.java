@@ -7,7 +7,7 @@ import java.util.Objects;
  * This class represents the key used to look up a goto in a LR table.
  * @author Chris Casson
  */
-public class GotoKey {
+public class GotoKey implements Comparable<GotoKey>{
 
     private int state;
     private NonTerminal nonTerminal;
@@ -62,5 +62,14 @@ public class GotoKey {
     @Override
     public String toString() {
         return "[ state = " + state + ", nonTerminal = " + nonTerminal + " ]";
+    }
+
+    @Override
+    public int compareTo(GotoKey o) {
+        if (this.state == o.state) {
+            return this.nonTerminal.compareTo(o.nonTerminal);
+        } else {
+            return this.state - o.state;
+        }
     }
 }

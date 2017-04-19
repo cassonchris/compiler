@@ -10,4 +10,9 @@ public enum Operator implements Terminal, Token {
     public Terminal getTerminalType() {
         return this;
     }
+    
+    @Override
+    public String toString() {
+        return "<" + this.name() + ">";
+    }
 }
