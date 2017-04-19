@@ -14,7 +14,6 @@ import casson.parser.tables.ItemSets;
 import casson.parser.tables.LRTable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -358,7 +357,7 @@ public class Grammar {
      * @param lookahead the number of tokens to lookahead
      * @return the set of terminals that begin strings derived from symbol
      */
-    Set<Terminal> first(Symbol symbol, int lookahead) {
+    private Set<Terminal> first(Symbol symbol, int lookahead) {
         // if the set already exists, return it
         if (firstSetMap.containsKey(symbol)) {
             return firstSetMap.get(symbol);
@@ -426,7 +425,7 @@ public class Grammar {
      * @param lookahead the number of tokens to lookahead
      * @return the set of terminals that can immediately follow symbol
      */
-    Set<Terminal> follow(Symbol symbol, int lookahead) {
+    private Set<Terminal> follow(Symbol symbol, int lookahead) {
         // if the set already exists, return it
         if (followSetMap.containsKey(symbol)) {
             return followSetMap.get(symbol);
