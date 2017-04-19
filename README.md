@@ -7,16 +7,16 @@
  * concatenation (no explicit character) - characters or character groups next to each other are concatenated together.
 
 ### Creating a RegularExpression
-'''java
+```java
 RegularExpression re = new RegularExpression("a|(bc)*");
-'''
+```
 
 ### Checking if a String is accepted by the RegularExpression
-'''java
+```java
 boolean accepts = re.accepts("bcbc");
-'''
+```
 
 ### Printing the RegularExpression's syntax tree
-'''java
+```java
 re.printSyntaxTree();
-'''
+```
