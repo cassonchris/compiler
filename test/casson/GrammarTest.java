@@ -85,6 +85,52 @@ public class GrammarTest {
         
         assertFalse(grammar.accepts(tokens));
     }
+
+    @Test
+    public void testK1Grammar() {
+        Map<Integer, Grammar.Production> productions = new HashMap<>();
+        productions.put(1, new Grammar.Production(
+                NonTerminal.GOAL,
+                NonTerminal.EXPRESSION));
+        productions.put(2, new Grammar.Production(
+                NonTerminal.EXPRESSION,
+                NonTerminal.EXPRESSION,
+                Operator.PLUS,
+                NonTerminal.TERM));
+        productions.put(3, new Grammar.Production(
+                NonTerminal.EXPRESSION,
+                NonTerminal.TERM));
+        productions.put(4, new Grammar.Production(
+                NonTerminal.TERM,
+                NonTerminal.TERM,
+                Operator.MULTIPLY,
+                NonTerminal.FACTOR));
+        productions.put(5, new Grammar.Production(
+                NonTerminal.TERM,
+                NonTerminal.FACTOR));
+        productions.put(6, new Grammar.Production(
+                NonTerminal.FACTOR,
+                Operand.ID));
+        productions.put(7, new Grammar.Production(
+                NonTerminal.FACTOR,
+                Punctuation.LEFTPAREN,
+                NonTerminal.EXPRESSION,
+                Punctuation.RIGHTPAREN));
+
+        Grammar grammar = new Grammar(productions, 1);
+        
+        grammar.printLRTable();
+
+        List<Token> tokens = new ArrayList<>();
+        tokens.add(new OperandToken(Operand.ID, "x"));
+        tokens.add(Operator.PLUS);
+        tokens.add(new OperandToken(Operand.ID, "y"));
+        tokens.add(Operator.MULTIPLY);
+        tokens.add(new OperandToken(Operand.ID, "z"));
+        tokens.add(Punctuation.EOF);
+
+        assertTrue(grammar.accepts(tokens));
+    }
     
     /**
      * S->SaSb
