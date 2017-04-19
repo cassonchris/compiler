@@ -158,6 +158,28 @@ public class Grammar {
     }
     
     /**
+     * Prints the first sets to standard out.
+     * 
+     * Only the first sets that are required are generated.
+     */
+    public void printFirstSetMap() {
+        System.out.println("First Sets:");
+        System.out.println(firstSetMap);
+        System.out.println();
+    }
+    
+    /**
+     * Prints the follow sets to standard out.
+     * 
+     * Only the follow sets that are required are generated.
+     */
+    public void printFollowSetMap() {
+        System.out.println("Follow Sets:");
+        System.out.println(followSetMap);
+        System.out.println();
+    }
+    
+    /**
      * Prints the action map and goto map for the LR table
      */
     public void printLRTable() {
