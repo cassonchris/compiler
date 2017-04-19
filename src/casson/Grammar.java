@@ -119,6 +119,9 @@ public class Grammar {
     // map of productions that make up the grammar
     private final Map<Integer, Production> productions;
     
+    // map to hold results of first(Symbol)
+    private Map<Symbol, Set<Terminal>> firstSetMap;
+    
     // the LR(k) table that contains action and goto
     private final LRTable table;
     
@@ -132,6 +135,8 @@ public class Grammar {
      */
     public Grammar(Map<Integer, Production> productions, int lookahead) {
         this.productions = productions;
+        
+        firstSetMap = new HashMap<>();
 
         symbols = new HashSet<>();
         
@@ -342,7 +347,6 @@ public class Grammar {
     }
 
     /**
-     * TODO - add lookup table and fix infinite recursion issues
      * Builds the set of terminal symbols that are valid in the initial position.
      * 
      * @param symbol the head (left side) of the production
@@ -350,13 +354,22 @@ public class Grammar {
      * @return the set of terminals that begin strings derived from symbol
      */
     Set<Terminal> first(Symbol symbol, int lookahead) {
+        // if the set already exists, return it
+        if (firstSetMap.containsKey(symbol)) {
+            return firstSetMap.get(symbol);
+        }
+        
+        // create a set for the first terminals
+        Set<Terminal> firstSet = new HashSet<>();  
+        
+        // put it in the map
+        firstSetMap.put(symbol, firstSet);
+        
         // if the symbol is a terminal, the first set is itself
         if (symbol instanceof Terminal) {
-            return new HashSet<>(Arrays.asList((Terminal) symbol));
+            firstSet.add((Terminal)symbol);
+            return firstSet;
         }
-
-        // create a set for the first terminals
-        Set<Terminal> firstSet = new HashSet<>();
 
         // get the productions where the given symbol is the head (left side) of the production
         Set<Production> symbolProductions = productions.values().stream()
@@ -369,42 +382,29 @@ public class Grammar {
                 // ... add epsilon to firstSet
                 firstSet.add(Epsilon.E);
             } else {
-                // get the first symbol from the body of the production
-                Symbol y1Symbol = symbolProduction.getBody().get(0);
-                // make sure it doesn't match the existing symbol, to prevent infinite recursion
-                if (!y1Symbol.equals(symbol)) {
-                    // get the first set for the first symbol
-                    Set<Terminal> y1Set = first(y1Symbol, lookahead);
-                    // remove epsilon
-                    y1Set.remove(Epsilon.E);
-                    // add the first set for the first symbol
-                    firstSet.addAll(y1Set);
-                }
-
-                // continue getting the first set for the rest of the symbols
+                // get the first set for the rest of the symbols
                 // until lookahead is reached or all symbols have been processed
-                for (int i = 1; i <= lookahead && i < symbolProduction.getBody().size(); i++) {
+                // or a first set does not contain epsilon
+                for (int i = 0; i <= lookahead && i < symbolProduction.getBody().size(); i++) {
                     // get the symbol
                     Symbol yiSymbol = symbolProduction.getBody().get(i);
-                    // make sure it doesn't match the existing symbol, to prevent infinite recursion
-                    if (!yiSymbol.equals(symbol)) {
-                        // get the first set for the symbol
-                        Set<Terminal> yiSet = first(yiSymbol, lookahead);
-                        // if yiSet contains epsilon ...
-                        if (yiSet.contains(Epsilon.E)) {
-                            // ... remove epsilon and add it to firstSet
-                            yiSet.remove(Epsilon.E);
-                            firstSet.addAll(yiSet);
-                        } else {
-                            // stop processing symbols
-                            break;
-                        }
+                    // get the first set for the symbol
+                    Set<Terminal> yiSet = first(yiSymbol, lookahead);
+                    // if yiSet contains epsilon ...
+                    if (yiSet.contains(Epsilon.E)) {
+                        // ... remove epsilon and add it to firstSet
+                        yiSet.remove(Epsilon.E);
+                        firstSet.addAll(yiSet);
+                    } else {
+                        firstSet.addAll(yiSet);
+                        
+                        // stop processing symbols
+                        break;
                     }
                 }
 
                 // if first(s) contains epsilon for all s in symbolProduction.body ...
                 if (symbolProduction.getBody().stream()
-                        .filter(s -> !s.equals(symbol))
                         .allMatch(s -> first(s, lookahead).contains(Epsilon.E))) {
                     // ... add epsilon to firstSet
                     firstSet.add(Epsilon.E);
