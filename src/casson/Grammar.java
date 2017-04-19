@@ -122,6 +122,9 @@ public class Grammar {
     // map to hold results of first(Symbol)
     private Map<Symbol, Set<Terminal>> firstSetMap;
     
+    // map to hold results of follow(Symbol)
+    private Map<Symbol, Set<Terminal>> followSetMap;
+    
     // the LR(k) table that contains action and goto
     private final LRTable table;
     
@@ -137,6 +140,8 @@ public class Grammar {
         this.productions = productions;
         
         firstSetMap = new HashMap<>();
+        
+        followSetMap = new HashMap<>();
 
         symbols = new HashSet<>();
         
@@ -390,15 +395,13 @@ public class Grammar {
                     Symbol yiSymbol = symbolProduction.getBody().get(i);
                     // get the first set for the symbol
                     Set<Terminal> yiSet = first(yiSymbol, lookahead);
+                    
+                    // add everything from yiSet except for epsilon
+                    firstSet.addAll(yiSet.stream().filter(t -> !t.equals(Epsilon.E)).collect(Collectors.toSet()));
+                    
                     // if yiSet contains epsilon ...
-                    if (yiSet.contains(Epsilon.E)) {
-                        // ... remove epsilon and add it to firstSet
-                        yiSet.remove(Epsilon.E);
-                        firstSet.addAll(yiSet);
-                    } else {
-                        firstSet.addAll(yiSet);
-                        
-                        // stop processing symbols
+                    if (!yiSet.contains(Epsilon.E)) {
+                        // ... stop processing symbols
                         break;
                     }
                 }
@@ -417,7 +420,6 @@ public class Grammar {
     }
 
     /**
-     * TODO - add lookup table and fix infinite recursion issues
      * Builds the set of terminals that can immediately follow the given symbol.
      * 
      * @param symbol can be any production symbol
@@ -425,8 +427,16 @@ public class Grammar {
      * @return the set of terminals that can immediately follow symbol
      */
     Set<Terminal> follow(Symbol symbol, int lookahead) {
+        // if the set already exists, return it
+        if (followSetMap.containsKey(symbol)) {
+            return followSetMap.get(symbol);
+        }
+        
         // create a set to store the terminals
         Set<Terminal> followSet = new HashSet<>();
+        
+        // put it in the map
+        followSetMap.put(symbol, followSet);
 
         // EOF ($) always gets added to goal's follow set
         if (symbol.equals(NonTerminal.GOAL)) {
@@ -434,8 +444,8 @@ public class Grammar {
         }
 
         // get the productions that contain the given symbol in the body (right side)
-        Collection<Production> symbolProductions = productions.values().stream()
-                .filter(p -> p.getBody().contains(symbol)).collect(Collectors.toList());
+        Set<Production> symbolProductions = productions.values().stream()
+                .filter(p -> p.getBody().contains(symbol)).collect(Collectors.toSet());
 
         // for each production
         for (Production symbolProduction : symbolProductions) {
@@ -472,7 +482,6 @@ public class Grammar {
                     
                     // if follow should continue to the head (left side) of the production ...
                     if (!nextSymbolIterator.hasNext()
-                            && !symbolProduction.getHead().equals(symbol)
                             && (!currentSymbolIterator.hasNext()
                                 || first(nextSymbolIterator.previous(), lookahead).contains(Epsilon.E))) {
                         // ... add the follow set for the head symbol
