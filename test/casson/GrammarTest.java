@@ -21,28 +21,23 @@ public class GrammarTest {
 
     @Test
     public void testK0Grammar() {
-        Map<Integer, Grammar.Production> productions = new HashMap<>();
-        productions.put(1, new Grammar.Production(
-                NonTerminal.GOAL,
-                NonTerminal.EXPRESSION));
-        productions.put(2, new Grammar.Production(
-                NonTerminal.EXPRESSION,
+        GrammarBuilder gb = new GrammarBuilder();
+        gb.addProduction(NonTerminal.GOAL,
+                NonTerminal.EXPRESSION)
+            .addProduction(NonTerminal.EXPRESSION,
                 NonTerminal.EXPRESSION,
                 Operator.PLUS,
-                NonTerminal.TERM));
-        productions.put(3, new Grammar.Production(
-                NonTerminal.EXPRESSION,
-                NonTerminal.TERM));
-        productions.put(4, new Grammar.Production(
-                NonTerminal.TERM,
-                Operand.ID));
-        productions.put(5, new Grammar.Production(
-                NonTerminal.TERM,
+                NonTerminal.TERM)
+            .addProduction(NonTerminal.EXPRESSION,
+                NonTerminal.TERM)
+            .addProduction(NonTerminal.TERM,
+                Operand.ID)
+            .addProduction(NonTerminal.TERM,
                 Punctuation.LEFTPAREN,
                 NonTerminal.EXPRESSION,
-                Punctuation.RIGHTPAREN));
-
-        Grammar grammar = new Grammar(productions, 0);
+                Punctuation.RIGHTPAREN);
+        
+        Grammar grammar = gb.toGrammar(0);
 
         List<Token> tokens = new ArrayList<>();
         tokens.add(new OperandToken(Operand.ID, "x"));
@@ -87,37 +82,30 @@ public class GrammarTest {
     }
 
     @Test
-    public void testK1Grammar() {
-        Map<Integer, Grammar.Production> productions = new HashMap<>();
-        productions.put(1, new Grammar.Production(
-                NonTerminal.GOAL,
-                NonTerminal.EXPRESSION));
-        productions.put(2, new Grammar.Production(
-                NonTerminal.EXPRESSION,
+    public void testK1Grammar() {        
+        GrammarBuilder gb = new GrammarBuilder();
+        gb.addProduction(NonTerminal.GOAL,
+                NonTerminal.EXPRESSION)
+            .addProduction(NonTerminal.EXPRESSION,
                 NonTerminal.EXPRESSION,
                 Operator.PLUS,
-                NonTerminal.TERM));
-        productions.put(3, new Grammar.Production(
-                NonTerminal.EXPRESSION,
-                NonTerminal.TERM));
-        productions.put(4, new Grammar.Production(
-                NonTerminal.TERM,
+                NonTerminal.TERM)
+            .addProduction(NonTerminal.EXPRESSION,
+                NonTerminal.TERM)
+            .addProduction(NonTerminal.TERM,
                 NonTerminal.TERM,
                 Operator.MULTIPLY,
-                NonTerminal.FACTOR));
-        productions.put(5, new Grammar.Production(
-                NonTerminal.TERM,
-                NonTerminal.FACTOR));
-        productions.put(6, new Grammar.Production(
-                NonTerminal.FACTOR,
-                Operand.ID));
-        productions.put(7, new Grammar.Production(
-                NonTerminal.FACTOR,
+                NonTerminal.FACTOR)
+            .addProduction(NonTerminal.TERM,
+                NonTerminal.FACTOR)
+            .addProduction(NonTerminal.FACTOR,
+                Operand.ID)
+            .addProduction(NonTerminal.FACTOR,
                 Punctuation.LEFTPAREN,
                 NonTerminal.EXPRESSION,
-                Punctuation.RIGHTPAREN));
-
-        Grammar grammar = new Grammar(productions, 1);
+                Punctuation.RIGHTPAREN);
+        
+        Grammar grammar = gb.toGrammar(1);
         
         grammar.printLRTable();
 
