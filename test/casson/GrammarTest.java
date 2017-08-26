@@ -1,16 +1,10 @@
 package casson;
 
-import casson.parser.symbols.Epsilon;
 import casson.parser.symbols.NonTerminal;
 import casson.parser.symbols.Operand;
-import casson.parser.symbols.OperandToken;
 import casson.parser.symbols.Operator;
 import casson.parser.symbols.Punctuation;
-import casson.parser.symbols.Token;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import casson.parser.symbols.TokenList;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -39,44 +33,44 @@ public class GrammarTest {
         
         Grammar grammar = gb.toGrammar(0);
 
-        List<Token> tokens = new ArrayList<>();
-        tokens.add(new OperandToken(Operand.ID, "x"));
-        tokens.add(Operator.PLUS);
-        tokens.add(new OperandToken(Operand.ID, "y"));
-        tokens.add(Operator.PLUS);
-        tokens.add(new OperandToken(Operand.ID, "z"));
-        tokens.add(Punctuation.EOF);
+        TokenList tokens = new TokenList();
+        tokens.addToken(Operand.ID, "x")
+            .addToken(Operator.PLUS)
+            .addToken(Operand.ID, "y")
+            .addToken(Operator.PLUS)
+            .addToken(Operand.ID, "z")
+            .addToken(Punctuation.EOF);
 
         assertTrue(grammar.accepts(tokens));
         
         System.out.println();
-        tokens = new ArrayList<>();
-        tokens.add(Punctuation.LEFTPAREN);
-        tokens.add(new OperandToken(Operand.ID, "x"));
-        tokens.add(Punctuation.RIGHTPAREN);
-        tokens.add(Punctuation.EOF);
+        tokens = new TokenList();
+        tokens.addToken(Punctuation.LEFTPAREN)
+            .addToken(Operand.ID, "x")
+            .addToken(Punctuation.RIGHTPAREN)
+            .addToken(Punctuation.EOF);
         
         assertTrue(grammar.accepts(tokens));
         
         System.out.println();
-        tokens = new ArrayList<>();
-        tokens.add(Punctuation.LEFTPAREN);
-        tokens.add(new OperandToken(Operand.ID, "x"));
-        tokens.add(Operator.PLUS);
-        tokens.add(new OperandToken(Operand.ID, "y"));
-        tokens.add(Punctuation.RIGHTPAREN);
-        tokens.add(Punctuation.EOF);
+        tokens = new TokenList();
+        tokens.addToken(Punctuation.LEFTPAREN)
+            .addToken(Operand.ID, "x")
+            .addToken(Operator.PLUS)
+            .addToken(Operand.ID, "y")
+            .addToken(Punctuation.RIGHTPAREN)
+            .addToken(Punctuation.EOF);
         
         assertTrue(grammar.accepts(tokens));
         
         System.out.println();
-        tokens = new ArrayList<>();
-        tokens.add(Punctuation.LEFTPAREN);
-        tokens.add(new OperandToken(Operand.ID, "x"));
-        tokens.add(Operator.MINUS);
-        tokens.add(new OperandToken(Operand.ID, "y"));
-        tokens.add(Punctuation.RIGHTPAREN);
-        tokens.add(Punctuation.EOF);
+        tokens = new TokenList();
+        tokens.addToken(Punctuation.LEFTPAREN)
+            .addToken(Operand.ID, "x")
+            .addToken(Operator.MINUS)
+            .addToken(Operand.ID, "y")
+            .addToken(Punctuation.RIGHTPAREN)
+            .addToken(Punctuation.EOF);
         
         assertFalse(grammar.accepts(tokens));
     }
@@ -109,13 +103,13 @@ public class GrammarTest {
         
         grammar.printLRTable();
 
-        List<Token> tokens = new ArrayList<>();
-        tokens.add(new OperandToken(Operand.ID, "x"));
-        tokens.add(Operator.PLUS);
-        tokens.add(new OperandToken(Operand.ID, "y"));
-        tokens.add(Operator.MULTIPLY);
-        tokens.add(new OperandToken(Operand.ID, "z"));
-        tokens.add(Punctuation.EOF);
+        TokenList tokens = new TokenList();
+        tokens.addToken(Operand.ID, "x")
+            .addToken(Operator.PLUS)
+            .addToken(Operand.ID, "y")
+            .addToken(Operator.MULTIPLY)
+            .addToken(Operand.ID, "z")
+            .addToken(Punctuation.EOF);
 
         assertTrue(grammar.accepts(tokens));
     }
