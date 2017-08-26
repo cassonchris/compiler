@@ -10,6 +10,9 @@
 <project name="Parser" default="default" basedir=".">
     <description>Builds, tests, and runs the project Parser.</description>
     <import file="nbproject/build-impl.xml"/>
+    
+    <property name="version" value="1.1.0" />
+
     <!--
 
     There exist several targets which are by default empty and which can be 
