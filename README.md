@@ -58,13 +58,13 @@ Grammar grammar = gb.toGrammar(0);
 
 ### Step 4: Use the Grammar object to check input
 ```java
-List<Token> tokens = new ArrayList<>();
-tokens.add(new OperandToken(Operand.ID, "x"));
-tokens.add(Operator.PLUS);
-tokens.add(new OperandToken(Operand.ID, "y"));
-tokens.add(Operator.PLUS);
-tokens.add(new OperandToken(Operand.ID, "z"));
-tokens.add(Punctuation.EOF);
+TokenList tokens = new TokenList();
+tokens.addToken(Operand.ID, "x")
+    .addToken(Operator.PLUS)
+    .addToken(Operand.ID, "y")
+    .addToken(Operator.PLUS)
+    .addToken(Operand.ID, "z")
+    .addToken(Punctuation.EOF);
 
 boolean accepts = grammar.accepts(tokens);
 ```
